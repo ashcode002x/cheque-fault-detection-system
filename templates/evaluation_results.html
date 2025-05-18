@@ -1,0 +1,104 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-line me-2"></i>Evaluation Results
+            </div>
+            <div class="card-body">
+                <h4 class="mb-4">Model Performance Evaluation</h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-percentage me-2"></i>Overall Accuracy</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="display-4 mb-2">{{ "%.2f"|format(accuracy) }}%</div>
+                                <p class="text-muted">Based on {{ results['true_labels']|length }} test images</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-table me-2"></i>Confusion Matrix</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                {% if conf_matrix %}
+                                    <img src="data:image/png;base64,{{ conf_matrix }}" class="img-fluid" alt="Confusion Matrix">
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>Not enough data to generate confusion matrix.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Detailed Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>True Label</th>
+                                        <th>Predicted Label</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in results['images'] %}
+                                        <tr>
+                                            <td>
+                                                <img src="data:image/png;base64,{{ item['thumbnail'] }}" 
+                                                     alt="Thumbnail" height="50" class="border">
+                                            </td>
+                                            <td>
+                                                <span class="badge {% if item['true_label'] == 'good' %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {{ item['true_label']|title }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge {% if item['predicted_label'] == 'good' %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {{ item['predicted_label']|title }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if item['true_label'] == item['predicted_label'] %}
+                                                    <span class="text-success">
+                                                        <i class="fas fa-check-circle me-1"></i>Correct
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-danger">
+                                                        <i class="fas fa-times-circle me-1"></i>Incorrect
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                    <a href="{{ url_for('evaluate') }}" class="btn btn-primary">
+                        <i class="fas fa-redo me-2"></i>Run Another Evaluation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

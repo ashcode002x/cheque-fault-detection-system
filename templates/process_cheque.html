@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-money-check-alt me-2"></i>Full Cheque Processing
+            </div>
+            <div class="card-body">
+                <h4 class="mb-4">Upload Cheque for Complete Verification</h4>
+                
+                <form method="POST" action="{{ url_for('process_cheque') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="cheque_file" class="form-label">
+                            <i class="fas fa-file-image me-2"></i>Cheque Image
+                        </label>
+                        <input type="file" class="form-control" id="cheque_file" name="cheque_file" required>
+                        <div class="form-text">Upload a clear image of the complete cheque.</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search-dollar me-2"></i>Process Cheque
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="alert alert-info mt-4">
+                    <h5><i class="fas fa-info-circle me-2"></i>Complete Verification Process</h5>
+                    <p>This feature processes the cheque through multiple verification steps:</p>
+                    <ol>
+                        <li>Validates that all required fields are present</li>
+                        <li>Extracts information from key fields (Account Number, Amount, Date, etc.)</li>
+                        <li>Identifies and extracts the signature</li>
+                        <li>Verifies the signature against the reference signature associated with the account number</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

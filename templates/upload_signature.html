@@ -1,0 +1,50 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-signature me-2"></i>Upload Reference Signature
+            </div>
+            <div class="card-body">
+                <h4 class="mb-4">Register Account Signature</h4>
+                
+                <form method="POST" action="{{ url_for('upload_signature') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="account_number" class="form-label">
+                            <i class="fas fa-hashtag me-2"></i>Account Number
+                        </label>
+                        <input type="text" class="form-control" id="account_number" name="account_number" required>
+                        <div class="form-text">Enter the bank account number associated with this signature.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="signature_file" class="form-label">
+                            <i class="fas fa-file-signature me-2"></i>Signature Image
+                        </label>
+                        <input type="file" class="form-control" id="signature_file" name="signature_file" required>
+                        <div class="form-text">Upload a clear image of the account holder's signature.</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Register Signature
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="alert alert-info mt-4">
+                    <h5><i class="fas fa-info-circle me-2"></i>Reference Signature Information</h5>
+                    <p>This signature will be used as a reference for verifying future cheques from this account.</p>
+                    <ul>
+                        <li>Upload a high-quality image with the signature against a clean background</li>
+                        <li>The signature should be properly oriented</li>
+                        <li>Each account can have one reference signature stored in the system</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

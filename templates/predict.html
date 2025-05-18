@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-search me-2"></i>Analyze Cheque
+            </div>
+            <div class="card-body">
+                <h4 class="mb-4">Upload Cheque for Analysis</h4>
+                
+                <form method="POST" action="{{ url_for('predict') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Select Cheque Image</label>
+                        <input class="form-control" type="file" id="file" name="file" accept=".jpg,.jpeg,.png" required>
+                        <div class="form-text">Upload a clear image of the cheque for analysis.</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-microscope me-2"></i>Analyze Cheque
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-4">
+                    <h5><i class="fas fa-info-circle me-2"></i>How it works</h5>
+                    <p>Our system analyzes the uploaded cheque image to detect critical fields including:</p>
+                    <ul>
+                        <li>Payee Name</li>
+                        <li>Amount in Numbers</li>
+                        <li>MICR Code (banking identification)</li>
+                        <li>Signature</li>
+                        <li>Date</li>
+                    </ul>
+                    <p>A cheque is classified as "good" when it contains all the required fields (Payee Name, Amount in Numbers, and MICR).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

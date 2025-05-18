@@ -1,0 +1,66 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-signature me-2"></i>Signature Comparison Results
+            </div>
+            <div class="card-body">
+                <h4 class="mb-4">Signature Verification Results</h4>
+                
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <div class="card mb-4">
+                            <div class="card-header {% if result == 'Match' %}bg-success{% else %}bg-danger{% endif %} text-white">
+                                <h5 class="mb-0">
+                                    {% if result == 'Match' %}
+                                        <i class="fas fa-check-circle me-2"></i>Signatures Match
+                                    {% else %}
+                                        <i class="fas fa-times-circle me-2"></i>Signatures Do Not Match
+                                    {% endif %}
+                                </h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="display-4 mb-2">{{ "%.2f"|format(score) }}%</div>
+                                <p class="text-muted">Similarity score (70% or higher is considered a match)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-check-double me-2"></i>Reference Signature</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <img src="data:image/png;base64,{{ ref_image }}" class="img-fluid border" alt="Reference Signature">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Test Signature</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <img src="data:image/png;base64,{{ test_image }}" class="img-fluid border" alt="Test Signature">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                    <a href="{{ url_for('signature') }}" class="btn btn-primary">
+                        <i class="fas fa-redo me-2"></i>Compare More Signatures
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

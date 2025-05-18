@@ -1,0 +1,104 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-money-check-alt me-2"></i>Cheque Processing Results
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Uploaded Cheque</h5>
+                        <img src="data:image/png;base64,{{ image_data }}" class="img-fluid border rounded mb-3" alt="Cheque Image">
+                        
+                        <div class="alert {% if cheque_quality == 'good' %}alert-success{% else %}alert-danger{% endif %}">
+                            <strong>Quality Check:</strong> 
+                            {% if cheque_quality == 'good' %}
+                                <i class="fas fa-check-circle me-2"></i>Good Cheque
+                            {% else %}
+                                <i class="fas fa-times-circle me-2"></i>Bad Cheque
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Extracted Information</h5>
+                        <table class="table table-striped">
+                            <tbody>
+                                {% for field, value in extracted_fields.items() %}
+                                <tr>
+                                    <th>{{ field }}</th>
+                                    <td>{{ value }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <h5 class="mb-3">Signature Verification</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="card">
+                                    <div class="card-header">Extracted Signature</div>
+                                    <div class="card-body text-center">
+                                        {% if extracted_signature %}
+                                            <img src="data:image/png;base64,{{ extracted_signature }}" class="img-fluid" alt="Extracted Signature">
+                                        {% else %}
+                                            <div class="alert alert-warning">No signature detected</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-2 d-flex justify-content-center align-items-center">
+                                <i class="fas fa-arrows-alt-h fa-2x"></i>
+                            </div>
+                            
+                            <div class="col-md-5">
+                                <div class="card">
+                                    <div class="card-header">Reference Signature</div>
+                                    <div class="card-body text-center">
+                                        {% if reference_signature %}
+                                            <img src="data:image/png;base64,{{ reference_signature }}" class="img-fluid" alt="Reference Signature">
+                                        {% else %}
+                                            <div class="alert alert-warning">No reference signature found for account {{ extracted_fields.get('Account Number', 'Unknown') }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            {% if signature_match %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Signature Match:</strong> {{ signature_score|round(2) }}% similarity
+                                </div>
+                            {% else %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Signature Mismatch:</strong> {{ signature_score|round(2) }}% similarity (threshold: 80%)
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('process_cheque') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Process Another Cheque
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

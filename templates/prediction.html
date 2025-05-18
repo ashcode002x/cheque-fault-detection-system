@@ -1,0 +1,103 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-search-plus me-2"></i>Analysis Results
+            </div>
+            <div class="card-body">
+                <h4 class="mb-4">Cheque Analysis Results</h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="text-center mb-3">
+                            <img src="data:image/png;base64,{{ image_data }}" class="img-fluid border" alt="Analyzed Cheque">
+                            <div class="mt-2">
+                                <small class="text-muted">File: {{ filename }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header {% if prediction == 'good' %}bg-success{% else %}bg-danger{% endif %} text-white">
+                                <h5 class="mb-0">
+                                    {% if prediction == 'good' %}
+                                        <i class="fas fa-check-circle me-2"></i>Good Cheque
+                                    {% else %}
+                                        <i class="fas fa-times-circle me-2"></i>Bad Cheque
+                                    {% endif %}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if prediction == 'good' %}
+                                    <p>This cheque contains all the required fields and appears to be valid.</p>
+                                {% else %}
+                                    <p>This cheque is missing one or more required fields.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Detected Fields</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if classes %}
+                                    <ul class="list-group">
+                                        {% for class_name in classes %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ class_name.replace('_', ' ') }}
+                                                <span class="badge bg-primary rounded-pill">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                    
+                                    {% set missing_fields = [] %}
+                                    {% set required_fields = ['Payee_Name', 'Amount_In_Numbers', 'MICR'] %}
+                                    {% for field in required_fields %}
+                                        {% if field not in classes %}
+                                            {% set missing_fields = missing_fields + [field] %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if missing_fields %}
+                                        <div class="alert alert-warning mt-3">
+                                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Missing Required Fields:</h6>
+                                            <ul>
+                                                {% for field in missing_fields %}
+                                                    <li>{{ field.replace('_', ' ') }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-exclamation-circle me-2"></i>No fields were detected in this image.
+                                    </div>
+                                {% endif %}
+                                
+                                {% if error %}
+                                    <div class="alert alert-danger mt-3">
+                                        <i class="fas fa-bug me-2"></i>Error: {{ error }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                    <a href="{{ url_for('predict') }}" class="btn btn-primary">
+                        <i class="fas fa-upload me-2"></i>Analyze Another Cheque
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

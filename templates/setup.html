@@ -1,0 +1,100 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-cog me-2"></i>Model Setup
+            </div>
+            <div class="card-body">
+                <h4 class="mb-4">Configure Roboflow Model</h4>
+                
+                <form method="POST" action="{{ url_for('setup') }}" id="setupForm">
+                    <div class="mb-3">
+                        <label for="api_key" class="form-label">
+                            <i class="fas fa-key me-2"></i>Roboflow API Key
+                        </label>
+                        <input type="text" class="form-control" id="api_key" name="api_key" required>
+                        <div class="form-text">Enter your Roboflow API key from your account dashboard.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="workspace" class="form-label">
+                            <i class="fas fa-folder me-2"></i>Workspace
+                        </label>
+                        <input type="text" class="form-control" id="workspace" name="workspace" required>
+                        <div class="form-text">Your Roboflow workspace name.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="project" class="form-label">
+                            <i class="fas fa-project-diagram me-2"></i>Project
+                        </label>
+                        <input type="text" class="form-control" id="project" name="project" required>
+                        <div class="form-text">Your Roboflow project name containing the cheque detection model.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="version" class="form-label">
+                            <i class="fas fa-code-branch me-2"></i>Model Version
+                        </label>
+                        <input type="number" class="form-control" id="version" name="version" required min="1">
+                        <div class="form-text">The version number of your trained model.</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Configuration
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="alert alert-info mt-4">
+                    <h5><i class="fas fa-info-circle me-2"></i>Setup Information</h5>
+                    <p>This configuration connects to your Roboflow object detection model that identifies key fields on cheque images. The model should be trained to detect:</p>
+                    <ul>
+                        <li>Payee Name</li>
+                        <li>Amount in Numbers</li>
+                        <li>MICR Code</li>
+                        <li>Signature</li>
+                        <li>Date</li>
+                    </ul>
+                    <p>You can find these credentials in your Roboflow account dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load values from sessionStorage when page loads
+        const formFields = ['api_key', 'workspace', 'project', 'version'];
+        
+        formFields.forEach(field => {
+            const savedValue = sessionStorage.getItem(`roboflow_${field}`);
+            if (savedValue) {
+                document.getElementById(field).value = savedValue;
+            }
+        });
+        
+        // Save values to sessionStorage when form is submitted
+        document.getElementById('setupForm').addEventListener('submit', function() {
+            formFields.forEach(field => {
+                const value = document.getElementById(field).value;
+                if (value) {
+                    sessionStorage.setItem(`roboflow_${field}`, value);
+                }
+            });
+        });
+        
+        // You can also save as the user types
+        formFields.forEach(field => {
+            document.getElementById(field).addEventListener('change', function() {
+                sessionStorage.setItem(`roboflow_${field}`, this.value);
+            });
+        });
+    });
+</script>
+{% endblock %}

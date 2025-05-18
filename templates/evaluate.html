@@ -1,0 +1,58 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-bar me-2"></i>Model Evaluation
+            </div>
+            <div class="card-body">
+                <h4 class="mb-4">Evaluate Model Performance</h4>
+                
+                <form method="POST" action="{{ url_for('evaluate') }}" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="good_files" class="form-label">
+                                    <i class="fas fa-check-circle me-2 text-success"></i>Good Cheque Images
+                                </label>
+                                <input class="form-control" type="file" id="good_files" name="good_files" accept=".jpg,.jpeg,.png" multiple>
+                                <div class="form-text">Upload one or more images of good quality cheques.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="bad_files" class="form-label">
+                                    <i class="fas fa-times-circle me-2 text-danger"></i>Bad Cheque Images
+                                </label>
+                                <input class="form-control" type="file" id="bad_files" name="bad_files" accept=".jpg,.jpeg,.png" multiple>
+                                <div class="form-text">Upload one or more images of bad quality cheques.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-chart-line me-2"></i>Run Evaluation
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="alert alert-info mt-4">
+                    <h5><i class="fas fa-info-circle me-2"></i>How Evaluation Works</h5>
+                    <p>The evaluation process:</p>
+                    <ol>
+                        <li>Upload sets of known "good" and "bad" cheque images</li>
+                        <li>The system runs detection on each image</li>
+                        <li>Results are compared against the known labels</li>
+                        <li>Performance metrics are calculated (accuracy, confusion matrix)</li>
+                    </ol>
+                    <p>This helps verify how well the model performs and identify any issues with detection.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
