@@ -35,7 +35,17 @@ class Model:
             classes = detections.data["class_name"]
             print(f"🔍 Detected: {classes}")
 
-            required = {'Account no','Amount','date','Bank name','cheque no'}
+            required = {
+                        "micr",
+                        "Date",
+                        "Account number",
+                        "ifsc",
+                        "Amount",
+                        "Signature",
+                        "from name",
+                        "payname",
+                        "Bank Name"
+                        }
             if required.issubset(set(classes)):
                 print("✅ Good cheque")
                 return "good"
@@ -522,7 +532,7 @@ def process_cheque():
                 img_str = base64.b64encode(buf.getvalue()).decode('utf-8')
                 
                 # Step 3: Extract field information
-                field_names = ['Account no', 'Amount', 'date', 'Bank name', 'cheque no', 'Signature']
+                field_names = ["micr","Date","Account number","ifsc","Amount","Signature","from name","payname","Bank Name"]
                 cropped_fields = model.crop_fields(image, detections, field_names)
                 
                 # Step 4: Process each field with OCR if needed
@@ -536,10 +546,10 @@ def process_cheque():
                 
                 # Step 5: Check for account number and clean it
                 account_number = None
-                if 'Account no' in extracted_fields:
-                    # Clean up account number (remove spaces and non-numeric chars)
-                    account_number = re.sub(r'[^0-9]', '', extracted_fields['Account no'])
-                    extracted_fields['Account no'] = account_number
+                if 'Account number' in extracted_fields:
+                    acct = re.sub(r'[^0-9]', '', extracted_fields['Account number'])
+                    account_number = acct
+                    extracted_fields['Account number'] = acct
                 
                 # Step 6: Process signature if found
                 signature_match = False
@@ -560,10 +570,11 @@ def process_cheque():
                     
                     # Look for reference signature based on account number
                     if account_number:
+                        # look for a file named "<account_number>.<ext>"
                         ref_sig_path = None
-                        # Check if we have a reference signature for this account
                         for fname in os.listdir(app.config['ORIGINAL_SIGNATURE_FOLDER']):
-                            if fname.startswith(account_number) and fname.lower().endswith((".jpg", ".jpeg", ".png")):
+                            if fname.startswith(f"{account_number}.") and \
+                               fname.lower().endswith((".jpg", ".jpeg", ".png")):
                                 ref_sig_path = os.path.join(app.config['ORIGINAL_SIGNATURE_FOLDER'], fname)
                                 break
                         
@@ -624,20 +635,18 @@ def upload_signature():
             return redirect(request.url)
         
         if file and allowed_file(file.filename):
-            # Create filename with account number prefix
-            extension = file.filename.rsplit('.', 1)[1].lower()
-            filename = f"{account_number}_signature.{extension}"
-            filepath = os.path.join(app.config['ORIGINAL_SIGNATURE_FOLDER'], filename)
-            
-            # Remove any existing signature for this account
-            for existing_file in os.listdir(app.config['ORIGINAL_SIGNATURE_FOLDER']):
-                if existing_file.startswith(f"{account_number}_"):
-                    os.remove(os.path.join(app.config['ORIGINAL_SIGNATURE_FOLDER'], existing_file))
-            
-            # Save the new signature
+            # store signature as "<account_number>.<extension>"
+            ext = file.filename.rsplit('.', 1)[1].lower()
+            filename = f"{account_number}.{ext}"
+            sig_dir = app.config['ORIGINAL_SIGNATURE_FOLDER']
+            # remove any existing for this account
+            for existing in os.listdir(sig_dir):
+                if existing.startswith(f"{account_number}."):
+                    os.remove(os.path.join(sig_dir, existing))
+            # save new
+            filepath = os.path.join(sig_dir, filename)
             file.save(filepath)
-            
-            flash(f'Signature for account {account_number} saved successfully!', 'success')
+            flash(f'Signature for account {account_number} saved!', 'success')
             return redirect(url_for('index'))
     
     return render_template('upload_signature.html')
