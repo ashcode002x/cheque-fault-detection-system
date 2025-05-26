@@ -15,6 +15,9 @@ from roboflow import Roboflow
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 from skimage.metrics import structural_similarity as ssim
 
+
+
+
 # Import the model class from the provided code
 class Model:
     def __init__(self, api_key: str, workspace: str, project: str, version: int):
@@ -184,6 +187,79 @@ evaluation_results = {
     'predicted_labels': [],
     'images': []
 }
+
+# Use Database and extract the account number and based upon the account number and return the location of the signature
+
+def get_db_connection():
+    return psycopg2.connect(
+        host='localhost',        # or your DB host
+        user='postgres',            # your DB username
+        password='Babita', # your DB password
+        dbname='chequedb'       # your DB name
+    )
+
+# get the signature path by account number (fuzzy search)
+def get_signature_path_by_account(account_number):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Use SIMILARITY for fuzzy search
+    query = "SELECT signature_path FROM accounts WHERE SIMILARITY(account_number::text, %s) > 0.3 ORDER BY SIMILARITY(account_number::text, %s) DESC LIMIT 1;"
+    
+    # Prepare the account number for similarity search
+    cursor.execute(query, (account_number, account_number))
+    result = cursor.fetchone()
+    
+    cursor.close()
+    conn.close()
+    
+    if result:
+        return result[1]  # Assuming signature_path is the second column (index 1)
+    return None
+
+
+
+# insert the signature path in the database
+def insert_signature(account_number, path):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Insert or update the signature path for the account number
+    query = """
+        INSERT INTO accounts (account_number, signature_path)
+        VALUES (%s, %s)
+        ON CONFLICT (account_number) 
+        DO UPDATE SET signature_path = EXCLUDED.signature_path
+    """
+    cursor.execute(query, (account_number, path))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def checkTable():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Check if the table exists
+    cursor.execute("""
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_name = 'accounts'
+        )
+    """)
+    exists = cursor.fetchone()[0]
+    
+    if not exists:
+        # Create the table if it doesn't exist
+        cursor.execute("""
+            CREATE TABLE accounts (
+                account_number VARCHAR(50) PRIMARY KEY,
+                signature_path TEXT NOT NULL
+            )
+        """)
+        conn.commit()
+    
+    cursor.close()
+    conn.close()
 
 # Initialize model with your API key
 # You will need to set this before running
@@ -478,6 +554,7 @@ def about():
 # Add these imports at the top if not already present
 import os
 import re
+import psycopg2
 
 # Add a new folder configuration for storing account-based signatures
 app.config['ORIGINAL_SIGNATURE_FOLDER'] = 'original-signatures'
@@ -571,12 +648,8 @@ def process_cheque():
                     # Look for reference signature based on account number
                     if account_number:
                         # look for a file named "<account_number>.<ext>"
-                        ref_sig_path = None
-                        for fname in os.listdir(app.config['ORIGINAL_SIGNATURE_FOLDER']):
-                            if fname.startswith(f"{account_number}.") and \
-                               fname.lower().endswith((".jpg", ".jpeg", ".png")):
-                                ref_sig_path = os.path.join(app.config['ORIGINAL_SIGNATURE_FOLDER'], fname)
-                                break
+                        ref_sig_path = get_signature_path_by_account(account_number) if account_number else None
+                        
                         
                         if ref_sig_path:
                             # Compare signatures
@@ -646,10 +719,13 @@ def upload_signature():
             # save new
             filepath = os.path.join(sig_dir, filename)
             file.save(filepath)
+            # Insert or update the signature path in the database
+            insert_signature(account_number, filepath)
             flash(f'Signature for account {account_number} saved!', 'success')
             return redirect(url_for('index'))
     
     return render_template('upload_signature.html')
 
 if __name__ == '__main__':
+    checkTable()  # Ensure the database table exists
     app.run(debug=True)

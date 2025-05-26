@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      - POSTGRES_USER=aashi
+      - POSTGRES_PASSWORD=AashishDtu25
+      - POSTGRES_DB=cheque_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - FLASK_RUN_HOST=0.0.0.0
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=aashi
+      - DATABASE_PASSWORD=AashishDtu25
+      - DATABASE_NAME=cheque_db
+    depends_on:
+      - db
+
+volumes:
+  db_data:
