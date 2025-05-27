@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Cheque with Transaction - Cheque Fault Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .navbar {
+            margin-bottom: 30px;
+            background-color: #3a86ff;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        .nav-link:hover {
+            color: white !important;
+        }
+        .upload-area {
+            border: 2px dashed #3a86ff;
+            border-radius: 10px;
+            padding: 50px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #2a75ff;
+            background-color: #f8f9fa;
+        }
+        .upload-area.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #3a86ff;
+            border-color: #3a86ff;
+        }
+        .btn-primary:hover {
+            background-color: #2a75ff;
+            border-color: #2a75ff;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-university me-2"></i>Cheque Detection System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                <a class="nav-link" href="{{ url_for('setup_banking') }}">Banking Setup</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-money-check-alt me-2"></i>Process Cheque with Transaction Simulation
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Flash Messages -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <p class="lead">Upload a cheque image for complete processing including transaction simulation.</p>
+                                
+                                <div class="alert alert-info">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Processing Steps:</h6>
+                                    <ol class="mb-0">
+                                        <li><strong>Image Analysis:</strong> Detect and extract cheque fields</li>
+                                        <li><strong>Text Recognition:</strong> Extract text from all fields using AI</li>
+                                        <li><strong>Signature Verification:</strong> Compare with stored reference</li>
+                                        <li><strong>Account Lookup:</strong> Find account using MICR code</li>
+                                        <li><strong>Balance Check:</strong> Verify sufficient funds</li>
+                                        <li><strong>Transaction Simulation:</strong> Process the payment</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                                        <h6>Secure Processing</h6>
+                                        <p class="small mb-0">All transactions are validated against multiple security checks</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                            <div class="mb-4">
+                                <label for="cheque_file" class="form-label">
+                                    <i class="fas fa-upload me-2"></i>Select Cheque Image
+                                </label>
+                                <div class="upload-area" id="uploadArea" onclick="document.getElementById('cheque_file').click()">
+                                    <div id="uploadContent">
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                        <h5>Drag and drop your cheque image here</h5>
+                                        <p class="text-muted">or click to browse</p>
+                                        <small class="text-muted">Supported formats: PNG, JPG, JPEG</small>
+                                    </div>
+                                    <div id="fileInfo" style="display: none;">
+                                        <i class="fas fa-file-image fa-3x text-success mb-3"></i>
+                                        <h6 id="fileName"></h6>
+                                        <small class="text-muted">Click to change file</small>
+                                    </div>
+                                </div>
+                                <input type="file" id="cheque_file" name="cheque_file" accept=".png,.jpg,.jpeg" style="display: none;" required>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-success btn-lg" id="processBtn" disabled>
+                                    <i class="fas fa-cogs me-2"></i>Process Cheque & Simulate Transaction
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="mt-5">
+                            <h5><i class="fas fa-chart-line me-2"></i>Transaction Validation Checks</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check-circle text-success me-2"></i>Account Status Verification
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check-circle text-success me-2"></i>Balance Sufficiency Check
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check-circle text-success me-2"></i>Daily/Monthly Limits
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check-circle text-success me-2"></i>Signature Authentication
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check-circle text-success me-2"></i>Date Validation
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check-circle text-success me-2"></i>MICR Code Verification
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const fileInput = document.getElementById('cheque_file');
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadContent = document.getElementById('uploadContent');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const processBtn = document.getElementById('processBtn');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                fileName.textContent = file.name;
+                uploadContent.style.display = 'none';
+                fileInfo.style.display = 'block';
+                processBtn.disabled = false;
+            }
+        });
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.match('image.*')) {
+                    fileInput.files = files;
+                    fileName.textContent = file.name;
+                    uploadContent.style.display = 'none';
+                    fileInfo.style.display = 'block';
+                    processBtn.disabled = false;
+                }
+            }
+        });
+
+        // Form submission with loading state
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            processBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            processBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

@@ -240,6 +240,39 @@
             </div>
         </div>
     </div>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-database me-2"></i>Banking Setup
+                </div>
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h5 class="card-title">Initialize Banking System</h5>
+                    <p class="card-text">Set up banking tables and sample accounts for transaction simulation.</p>
+                    <a href="{{ url_for('setup_banking') }}" class="btn btn-primary">Setup Banking</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="fas fa-coins me-2"></i>Transaction Simulation
+                </div>
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h5 class="card-title">Complete Transaction Processing</h5>
+                    <p class="card-text">Process cheques with full banking validation and transaction simulation.</p>
+                    <a href="{{ url_for('process_cheque_with_transaction') }}" class="btn btn-primary">Process Transaction</a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 </div>
 
