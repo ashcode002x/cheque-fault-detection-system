@@ -10,8 +10,12 @@ A comprehensive AI-powered banking solution for automated cheque processing, val
 ![image](https://github.com/user-attachments/assets/08792d89-2244-42f2-b86e-cad58716a256)
 ![image](https://github.com/user-attachments/assets/6acc81d5-0a26-4bfd-98bb-964808149d71)
 ![image](https://github.com/user-attachments/assets/f4cc3f43-f897-411d-9367-36284e189432)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue.svg)](https://www.postgresql.org/)
+
 
 ## 🌟 Features
 
